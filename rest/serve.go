@@ -100,18 +100,7 @@ func serveSearchAPIStructured(ctx context.Context, searcher zoekt.Searcher, req 
 		return &SearchResponse{Error: &msg}, nil
 	}
 
-	var restrictions []query.Q
-	for _, r := range req.Restrict {
-		var branchQs []query.Q
-		for _, b := range r.Branches {
-			branchQs = append(branchQs, &query.Branch{Pattern: b})
-		}
-
-		restrictions = append(restrictions,
-			query.NewAnd(&query.Repo{Pattern: r.Repo}, query.NewOr(branchQs...)))
-	}
-
-	finalQ := query.Simplify(query.NewAnd(q, query.NewOr(restrictions...)))
+	finalQ := q
 	var options zoekt.SearchOptions
 	options.SetDefaults()
 
@@ -122,6 +111,9 @@ func serveSearchAPIStructured(ctx context.Context, searcher zoekt.Searcher, req 
 
 	// TODO - make this tunable. Use a query param or a JSON struct?
 	num := 50
+	if (req.MaxResultFiles > num) {
+		num = req.MaxResultFiles;
+	}
 	if len(result.Files) > num {
 		result.Files = result.Files[:num]
 	}

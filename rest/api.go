@@ -18,6 +18,8 @@ package rest
 type SearchRequest struct {
 	Query string
 
+	MaxResultFiles int
+
 	// A list of OR'd restrictions.
 	Restrict []SearchRequestRestriction
 }
